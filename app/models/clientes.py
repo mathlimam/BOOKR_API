@@ -1,4 +1,5 @@
 from utils import database
+from sqlalchemy import *
 import bcrypt
 
 
@@ -32,8 +33,8 @@ class Client:
   
 
     #verificando o cpf
-        query = "select count(1) from clientes where cpf = %s"
-        cursor.execute(query, (cpf))
+        query = "select count(1) from clientes where %s = %s"
+        cursor.execute(query, ("cpf",cpf))
         result = cursor.fetchone()[0]
         if result != 0: 
             print("cpf em uso")

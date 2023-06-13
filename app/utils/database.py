@@ -1,4 +1,5 @@
 import pymysql
+from sqlalchemy import create_engine
 import mysql.connector
 from dotenv import load_dotenv
 import os
@@ -17,10 +18,10 @@ CRED = {
 
 def db_conn():
     try:
-        conn = pymysql.connect(host=CRED['HOST'], user=CRED['USER'], passwd=CRED['PASSWORD'], autocommit=True)
-
+        url = f"mysql+pymysql://{CRED['USER']}:{CRED['PASSWORD']}@{CRED['HOST']}:{CRED['PORT']}"
+        engine = create_engine(url)
         print("SUCCESSFUL CONNECTION")
-        return conn.cursor()
+        return engine
  
     except mysql.connector.Error as e:
         print(f"CONNECTION FAILED - ERROR {e}")
