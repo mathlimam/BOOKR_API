@@ -17,7 +17,7 @@ CRED = {
 
 def db_conn():
     try:
-        conn = pymysql.connect(host=CRED['HOST'], user=CRED['USER'], passwd=CRED['PASSWORD'])
+        conn = pymysql.connect(host=CRED['HOST'], user=CRED['USER'], passwd=CRED['PASSWORD'], autocommit=True)
 
         print("SUCCESSFUL CONNECTION")
         return conn.cursor()

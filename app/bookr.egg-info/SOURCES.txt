@@ -1,0 +1,9 @@
+setup.py
+bookr.egg-info/PKG-INFO
+bookr.egg-info/SOURCES.txt
+bookr.egg-info/dependency_links.txt
+bookr.egg-info/top_level.txt
+models/__init__.py
+models/clientes.py
+utils/__init__.py
+utils/database.py
