@@ -18,10 +18,9 @@ CRED = {
 
 def db_conn():
     try:
-        url = f"mysql+pymysql://{CRED['USER']}:{CRED['PASSWORD']}@{CRED['HOST']}:{CRED['PORT']}"
+        url = f"mysql+pymysql://{CRED['USER']}:{CRED['PASSWORD']}@{CRED['HOST']}:{CRED['PORT']}/bookrdb"
         engine = create_engine(url)
-        print("SUCCESSFUL CONNECTION")
-        return engine
+        return engine.connect()
  
     except mysql.connector.Error as e:
         print(f"CONNECTION FAILED - ERROR {e}")

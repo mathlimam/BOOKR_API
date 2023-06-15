@@ -1,84 +1,138 @@
+import json
 from utils import database
-from sqlalchemy import *
+from sqlalchemy import Table, delete, select, MetaData, insert, func
 import bcrypt
+import logging
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class Client:
+    """
+    A class representing a client in the system.
+    """
+
     @staticmethod
-    def get_id(username, cpf):
-        cursor = database.db_conn()
-        cursor.execute("use bookrdb")
-        query = "select client_id from `clientes` where username = %s"
+    def get_client_id(username):
+        """
+        Returns the client ID of the specified username.
 
-    
-        cursor.execute(query, (username))
-        result = cursor.fetchall()
-        return result
+        :param username: Username of client.
+        :type username: str
+        :return: Client ID.
+        :rtype: int
+        """
+        engine = database.db_conn()
+        clientes = Table('clientes', MetaData(), autoload_with=engine)
+        query = select(clientes.c.client_id).where(clientes.c.username == username)
+        result = engine.execute(query)
 
+        return result.scalar()
+
+    @staticmethod
     def verify(username, cpf, email):
-        bool = True
-        cursor = database.db_conn()
-        query ="use bookrdb"
-        cursor.execute(query)
+        """
+        Verifies if the specified username, CPF, and email are available for client creation.
 
+        :param username: Username of client.
+        :type username: str
+        :param cpf: CPF of client.
+        :type cpf: str
+        :param email: Email of client.
+        :type email: str
+        :return: True if all specified fields are available, False otherwise.
+        :rtype: bool
+        """
+        engine = database.db_conn()
+        clientes = Table('clientes', MetaData(), autoload_with=engine)
 
-    #verificando o username
-        query = "select count(1) from clientes where username = %s"
-        cursor.execute(query, (username))
-        result = cursor.fetchone()[0]
-        if result != 0: 
-            print("username em uso")
-            bool = False
-            return bool
-  
+        try:
+            # Verify username
+            query = select(func.count(1)).where(clientes.c.username == username)
+            result = engine.execute(query)
+            count = result.scalar()
+            if count != 0: 
+                logger.warning("Username already in use.")
+                return False
 
-    #verificando o cpf
-        query = "select count(1) from clientes where %s = %s"
-        cursor.execute(query, ("cpf",cpf))
-        result = cursor.fetchone()[0]
-        if result != 0: 
-            print("cpf em uso")
-            bool = False
-            return bool
+            # Verify CPF
+            query = select(func.count(1)).where(clientes.c.cpf == cpf)
+            result = engine.execute(query)
+            count = result.scalar()
+            if count != 0: 
+                logger.warning("CPF already in use.")
+                return False
+
+            # Verify email
+            query = select(func.count(1)).where(clientes.c.email == email)
+            result = engine.execute(query)
+            count = result.scalar()
+            if count != 0: 
+                logger.warning("Email already in use.")
+                return False
         
-
-    #verificando o email
-        query = "select count(1) from clientes where email = %s"
-        cursor.execute(query, (email))
-        result = cursor.fetchone()[0]
-        if result != 0: 
-            print("cpf em uso")
-            bool = False
-            return bool
+            return True
         
-        return bool
+        except Exception as e:
+            logger.error("Error verifying client information. Error: %s", e)
+            return False
 
-    def creation(username, password, cpf, name, email, phone):
+    @staticmethod
+    def create(req):
+        """
+        Creates a new client with the specified information.
 
-        if Client.verify(username, password, cpf):
+        :param username: Username of client.
+        :type username: str
+        :param password: Password of client.
+        :type password: str
+        :param cpf: CPF of client.
+        :type cpf: str
+        :param name: Name of client.
+        :type name: str
+        :param email: Email of client.
+        :type email: str
+        :param phone: Phone number of client.
+        :type phone: str
+        """
+        # Connect to database and table
+        engine = database.db_conn()
+        clientes = Table("clientes", MetaData(), autoload_with=engine)
+
+        data = req
+
+        if Client.verify(data['username'], data['cpf'], data['email']):
             try:
-                salt = bcrypt.gensalt(12)
-                password = bcrypt.hashpw(password.encode("utf-8"), salt)
-                cursor = database.db_conn()
-
-
-                cursor.execute("USE bookrdb")
-                query=  '''
-                        insert into `clientes`  (username, password, cpf, name, email, phone, salt) values (%s, %s, %s, %s, %s, %s, %s)
-                        '''
-                cursor.execute(query, (username, password, cpf, name, email, phone, salt))
-                cursor.fetchall()
-
-                print("Usuario criado com sucesso")
+                data['password'] = bcrypt.hashpw(data['password'], bcrypt.gensalt(12))
+                
+                with engine as conn:
+                    conn.execute(insert(clientes).values(**data))
+                    conn.commit()
+                    logger.info("Client created successfully.")
 
             except Exception as e:
-                print(f"Failed - error: {e}")
-        
-        
-        else: print("O cliente não passou na verificação.")
-    
+                logger.error("Client creation failed. Error: %s", e)
+
+    @staticmethod
     def delete(username):
-        pass
+        """
+        Deletes the client with the specified username.
 
+        :param username: Username of client.
+        :type username: str
+        """
+        try:
+            engine = database.db_conn()
+            clientes = Table("clientes", MetaData(), autoload_with=engine)
 
-Client.creation("mathlimam", "abracadabra", "11111111111", "Matheus", "matheus", 71999448860)
+            client_id = Client.get_client_id(username)
+
+            stmt = delete(clientes).where(clientes.c.client_id == client_id)
+
+            with engine as conn:
+                conn.execute(stmt)
+                conn.commit()
+                logger.info("Client deleted successfully.")
+
+        except Exception as e:
+            logger.error("Client deletion failed. Error: %s", e)
