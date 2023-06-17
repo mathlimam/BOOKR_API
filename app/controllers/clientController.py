@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request
 from models.clientModel import create_client, get_clients, update_client, delete_client
 import logging
-import uvicorn
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -15,6 +15,7 @@ def get():
     Return: All clients.
     """
     return get_clients()
+
 
 @app.post("/clients")
 async def create_client_endpoint(request: Request):
@@ -78,5 +79,3 @@ async def delete_client_endpoint(client_id: int):
         logger.error("Error deleting client: %s", e)
         return e
     
-if __name__ =="__main__":
-    uvicorn.run(app)
