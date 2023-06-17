@@ -30,7 +30,7 @@ async def create_client_endpoint(request: Request):
         created_client = await create_client(data)
         logger.info("Client created: %s", created_client)
         return created_client
-    
+
     except Exception as e:
         logger.error("Error creating client: %s", e)
         return e

@@ -32,7 +32,7 @@ class ClienteDB(Base):
     email = Column(String(255), nullable=False, unique=True)
     phone = Column(String(12), nullable=False, unique=True)
 
-    
+  
     def __repr__(self):
         return f"username: {self.username}, password: {self.password}, name: {self.name}, cpf: {self.cpf}, email: {self.email}, phone: {self.phone}"
 
