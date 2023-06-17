@@ -1,4 +1,3 @@
-from flask import jsonify
 from pydantic import BaseModel
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import declarative_base
@@ -49,7 +48,7 @@ class ClienteDB(Base):
         except Exception as e:
             print(e)
 
-    
+
     def update(self, session, **kwargs):
         """
         Updates client data in database.
@@ -81,6 +80,7 @@ class ClienteDB(Base):
 
 Base.metadata.create_all(bind=engine)
 
+
 def create_client(data):
     """
     Creates a new client in the database.
@@ -110,7 +110,7 @@ def create_client(data):
    
     return db_cliente
 
-def update_client(id, data):
+def update_client(clientid, data):
     """
     Updates an existing client in the database.
 
@@ -122,7 +122,7 @@ def update_client(id, data):
     :rtype: dict
     """
     db = db_session()
-    db_cliente = db.query(ClienteDB).filter_by(client_id=id).first()
+    db_cliente = db.query(ClienteDB).filter_by(client_id=clientid).first()
 
     try:
         db_cliente.update(db, **data)
@@ -133,7 +133,7 @@ def update_client(id, data):
         return {"error": "Failed to update client."}
 
 
-def delete_client(id):
+def delete_client(clientid):
     """
     Deletes an existing client from the database.
 
@@ -141,5 +141,5 @@ def delete_client(id):
     :type id: int
     """
     db = db_session()
-    db_cliente = db.query(ClienteDB).filter_by(client_id=id).first()
+    db_cliente = db.query(ClienteDB).filter_by(client_id=clientid).first()
     db_cliente.delete(db)
