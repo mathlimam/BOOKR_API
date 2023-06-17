@@ -32,6 +32,10 @@ class ClienteDB(Base):
     email = Column(String(255), nullable=False, unique=True)
     phone = Column(String(12), nullable=False, unique=True)
 
+    
+    def __repr__(self):
+        return f"username: {self.username}, password: {self.password}, name: {self.name}, cpf: {self.cpf}, email: {self.email}, phone: {self.phone}"
+
     def save(self, session):
         """
         Saves client data to database.
@@ -82,7 +86,7 @@ class ClienteDB(Base):
 Base.metadata.create_all(bind=engine)
 
 
-def create_client(data):
+async def create_client(data):
     """
     Creates a new client in the database.
 
@@ -104,12 +108,13 @@ def create_client(data):
     try:
         sess= db_session()
         db_cliente.save(sess)
+        return db_cliente
 
     except Exception as e:
         print(e)
         return {"error": "Failed to create client."}
-   
-    return db_cliente
+
+
 
 def update_client(clientid, data):
     """
@@ -144,3 +149,10 @@ def delete_client(clientid):
     db = db_session()
     db_cliente = db.query(ClienteDB).filter_by(client_id=clientid).first()
     db_cliente.delete(db)
+
+
+def get_clients():
+    db = db_session()
+    clients = db.query(ClienteDB).all()
+    
+    return clients
