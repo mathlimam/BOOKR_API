@@ -21,7 +21,7 @@ def db_conn():
         url = f"mysql+pymysql://{CRED['USER']}:{CRED['PASSWORD']}@{CRED['HOST']}:{CRED['PORT']}/bookr"
         engine = create_engine(url)
         return engine.connect()
-    
+
     except mysql.connector.Error as e:
         print(f"CONNECTION FAILED - ERROR {e}")
 

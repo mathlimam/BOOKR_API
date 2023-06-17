@@ -66,7 +66,7 @@ class ClienteDB(Base):
         except Exception as e:
             print(e)
 
-    
+
     def delete(self, session):
         """
         Deletes client data from database.
@@ -77,6 +77,7 @@ class ClienteDB(Base):
         session.delete(self)
         session.commit()
         session.close()
+
 
 Base.metadata.create_all(bind=engine)
 
